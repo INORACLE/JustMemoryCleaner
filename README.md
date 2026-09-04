@@ -1,5 +1,3 @@
-我已经为你的 **JustMemoryCleaner** 项目准备好了一份完整的 **README.md**，你可以直接复制到当前 GitHub 仓库中使用。内容如下：
-
 ```markdown
 # JustMemoryCleaner
 
