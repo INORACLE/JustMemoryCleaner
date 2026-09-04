@@ -37,6 +37,7 @@ public class MemoryCleaner {
     private final AtomicInteger totalPlayersCleaned = new AtomicInteger(0);
     private long lastMemoryUsage = 0L;
     private Field chunksField;
+    private Field chunkMapField;
     private Field toDropField;
     private boolean reflectionInitialized = false;
     private int lastTrackedChunkCount = 0;
@@ -370,11 +371,16 @@ public class MemoryCleaner {
 
     private void scheduleChunkUnload(ServerChunkCache chunkCache, ChunkPos pos) {
         try {
+            if (this.chunkMapField == null) {
+                this.chunkMapField = ServerChunkCache.class.getDeclaredField("chunkMap");
+                this.chunkMapField.setAccessible(true);
+            }
+            ChunkMap chunkMap = (ChunkMap) this.chunkMapField.get(chunkCache);
             if (this.toDropField == null) {
                 this.toDropField = ChunkMap.class.getDeclaredField("toDrop");
                 this.toDropField.setAccessible(true);
             }
-            LongSet toDrop = (LongSet) this.toDropField.get(chunkCache.chunkMap);
+            LongSet toDrop = (LongSet) this.toDropField.get(chunkMap);
             toDrop.add(pos.toLong());
         } catch (ReflectiveOperationException e) {
             MemoryCleanerMod.LOGGER.debug("\u5f3a\u5236\u5378\u8f7d\u533a\u5757\u65f6\u51fa\u9519: {}", e.getMessage());

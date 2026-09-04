@@ -7,7 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraft.server.MinecraftServer;
 
 public class ModCommands {
     private static boolean isClientSide(CommandSourceStack source) {
@@ -152,9 +152,10 @@ public class ModCommands {
         source.sendSuccess(() -> Component.literal("\u00a7b===== \u670d\u52a1\u5668\u5185\u5b58\u72b6\u6001 ====="), false);
         source.sendSuccess(() -> Component.literal(String.format("\u00a77\u5df2\u4f7f\u7528: \u00a7a%dMB \u00a77/ \u00a7c%dMB \u00a77(\u00a7e%d%%\u00a77)", used, max, percent)), false);
         source.sendSuccess(() -> Component.literal(String.format("\u00a77\u5df2\u5206\u914d: \u00a7b%dMB \u00a77| \u7a7a\u95f2: \u00a72%dMB", total, free)), false);
-        if (ServerLifecycleHooks.getCurrentServer() != null) {
-            int playerCount = ServerLifecycleHooks.getCurrentServer().getPlayerCount();
-            int maxPlayers = ServerLifecycleHooks.getCurrentServer().getMaxPlayers();
+        MinecraftServer server = source.getServer();
+        if (server != null) {
+            int playerCount = server.getPlayerCount();
+            int maxPlayers = server.getMaxPlayers();
             source.sendSuccess(() -> Component.literal(String.format("\u00a77\u5728\u7ebf\u73a9\u5bb6: \u00a7d%d\u00a77/\u00a7d%d", playerCount, maxPlayers)), false);
             if (MemoryCleanerMod.getServerCleaner() != null) {
                 source.sendSuccess(() -> Component.literal("\u00a77\u6e05\u7406\u5668\u72b6\u6001: \u00a7a\u8fd0\u884c\u4e2d"), false);
@@ -389,6 +390,7 @@ public class ModCommands {
 
     private static int executeReloadConfig(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
+        Config.reload();
         source.sendSuccess(() -> Component.literal("\u00a7a\u2713 \u914d\u7f6e\u5df2\u91cd\u65b0\u52a0\u8f7d\uff01"), false);
         return 1;
     }

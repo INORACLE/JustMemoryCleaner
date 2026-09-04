@@ -11,7 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Path;
-import net.neoforged.fml.loading.FMLPaths;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class MemorySettingsConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -118,7 +118,7 @@ public class MemorySettingsConfig {
     }
 
     private File getConfigFile() {
-        Path configPath = FMLPaths.CONFIGDIR.get();
+        Path configPath = FabricLoader.getInstance().getConfigDir();
         return configPath.resolve(CONFIG_FILE_NAME).toFile();
     }
 

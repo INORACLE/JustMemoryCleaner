@@ -1,73 +1,195 @@
 package com.memorycleaner;
 
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import net.fabricmc.loader.api.FabricLoader;
 
-@EventBusSubscriber(modid = MemoryCleanerMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Config {
-    public static final ModConfigSpec SERVER_SPEC;
-    public static final ModConfigSpec CLIENT_SPEC;
-    public static final ModConfigSpec.BooleanValue AUTO_CLEAN_ENABLED;
-    public static final ModConfigSpec.IntValue AUTO_CLEAN_INTERVAL;
-    public static final ModConfigSpec.IntValue MEMORY_THRESHOLD_PERCENT;
-    public static final ModConfigSpec.BooleanValue CLEAN_UNLOADED_CHUNKS;
-    public static final ModConfigSpec.IntValue CHUNK_UNLOAD_THRESHOLD_TICKS;
-    public static final ModConfigSpec.IntValue MAX_CHUNKS_PER_CLEAN;
-    public static final ModConfigSpec.BooleanValue CLEAN_INVALID_PLAYERS;
-    public static final ModConfigSpec.IntValue PLAYER_CLEAN_INTERVAL;
-    public static final ModConfigSpec.IntValue CLEAN_BATCH_SIZE;
-    public static final ModConfigSpec.IntValue CLEAN_DELAY_TICKS;
-    public static final ModConfigSpec.BooleanValue AGGRESSIVE_MODE;
-    public static final ModConfigSpec.IntValue CLEAN_COOLDOWN_SECONDS;
-    public static final ModConfigSpec.BooleanValue AUTO_CLEAN_ON_THRESHOLD;
-    public static final ModConfigSpec.BooleanValue CLIENT_AUTO_CLEAN;
-    public static final ModConfigSpec.IntValue CLIENT_CLEAN_INTERVAL;
-    public static final ModConfigSpec.IntValue CLIENT_MEMORY_THRESHOLD;
-    public static final ModConfigSpec.BooleanValue CLIENT_SHOW_DEBUG;
+    public static final List<ConfigValue> SERVER_VALUES = new ArrayList<>();
+    public static final List<ConfigValue> CLIENT_VALUES = new ArrayList<>();
 
-    @SubscribeEvent
-    public static void onLoad(ModConfigEvent.Loading event) {
-        MemoryCleanerMod.LOGGER.info("\u914d\u7f6e\u5df2\u52a0\u8f7d \u2713");
+    // server config
+    public static final BooleanValue AUTO_CLEAN_ENABLED = server("autoCleanEnabled", true);
+    public static final IntValue AUTO_CLEAN_INTERVAL = server("autoCleanInterval", 10);
+    public static final IntValue MEMORY_THRESHOLD_PERCENT = server("memoryThresholdPercent", 80);
+    public static final BooleanValue CLEAN_UNLOADED_CHUNKS = server("cleanUnloadedChunks", true);
+    public static final IntValue CHUNK_UNLOAD_THRESHOLD_TICKS = server("chunkUnloadThresholdTicks", 600);
+    public static final IntValue MAX_CHUNKS_PER_CLEAN = server("maxChunksPerClean", 1000);
+    public static final BooleanValue CLEAN_INVALID_PLAYERS = server("cleanInvalidPlayers", true);
+    public static final IntValue PLAYER_CLEAN_INTERVAL = server("playerCleanInterval", 5);
+    public static final IntValue CLEAN_BATCH_SIZE = server("cleanBatchSize", 50);
+    public static final IntValue CLEAN_DELAY_TICKS = server("cleanDelayTicks", 5);
+    public static final BooleanValue AGGRESSIVE_MODE = server("aggressiveMode", false);
+    public static final IntValue CLEAN_COOLDOWN_SECONDS = server("cleanCooldownSeconds", 60);
+    public static final BooleanValue AUTO_CLEAN_ON_THRESHOLD = server("autoCleanOnThreshold", true);
+
+    // client config
+    public static final BooleanValue CLIENT_AUTO_CLEAN = client("clientAutoClean", true);
+    public static final IntValue CLIENT_CLEAN_INTERVAL = client("clientCleanInterval", 60);
+    public static final IntValue CLIENT_MEMORY_THRESHOLD = client("clientMemoryThreshold", 85);
+    public static final BooleanValue CLIENT_SHOW_DEBUG = client("clientShowDebug", false);
+
+    private static final File SERVER_CONFIG_FILE = getConfigFile("memorycleaner-server.json");
+    private static final File CLIENT_CONFIG_FILE = getConfigFile("memorycleaner-client.json");
+
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+    static {
+        loadConfig(SERVER_CONFIG_FILE, SERVER_VALUES);
+        loadConfig(CLIENT_CONFIG_FILE, CLIENT_VALUES);
     }
 
-    @SubscribeEvent
-    public static void onReload(ModConfigEvent.Reloading event) {
+    private static File getConfigFile(String name) {
+        return FabricLoader.getInstance().getConfigDir().resolve(name).toFile();
+    }
+
+    private static BooleanValue server(String key, boolean defaultValue) {
+        BooleanValue value = new BooleanValue(key, defaultValue);
+        SERVER_VALUES.add(value);
+        return value;
+    }
+
+    private static IntValue server(String key, int defaultValue) {
+        IntValue value = new IntValue(key, defaultValue);
+        SERVER_VALUES.add(value);
+        return value;
+    }
+
+    private static BooleanValue client(String key, boolean defaultValue) {
+        BooleanValue value = new BooleanValue(key, defaultValue);
+        CLIENT_VALUES.add(value);
+        return value;
+    }
+
+    private static IntValue client(String key, int defaultValue) {
+        IntValue value = new IntValue(key, defaultValue);
+        CLIENT_VALUES.add(value);
+        return value;
+    }
+
+    public static void reload() {
+        loadConfig(SERVER_CONFIG_FILE, SERVER_VALUES);
+        loadConfig(CLIENT_CONFIG_FILE, CLIENT_VALUES);
         MemoryCleanerMod.LOGGER.info("\u914d\u7f6e\u5df2\u91cd\u65b0\u52a0\u8f7d \u2713");
     }
 
-    static {
-        ModConfigSpec.Builder serverBuilder = new ModConfigSpec.Builder();
-        serverBuilder.push("auto_clean");
-        AUTO_CLEAN_ENABLED = serverBuilder.comment("\u542f\u7528\u81ea\u52a8\u5185\u5b58\u6e05\u7406").define("enabled", true);
-        AUTO_CLEAN_INTERVAL = serverBuilder.comment("\u81ea\u52a8\u6e05\u7406\u95f4\u9694\uff08\u5206\u949f\uff09").defineInRange("interval", 10, 1, 60);
-        MEMORY_THRESHOLD_PERCENT = serverBuilder.comment("\u5185\u5b58\u4f7f\u7528\u9608\u503c\u767e\u5206\u6bd4\uff0c\u8d85\u8fc7\u6b64\u503c\u89e6\u53d1\u6e05\u7406").defineInRange("threshold", 80, 50, 95);
-        serverBuilder.pop();
-        serverBuilder.push("chunk_cleanup");
-        CLEAN_UNLOADED_CHUNKS = serverBuilder.comment("\u6e05\u7406\u5df2\u5378\u8f7d\u4f46\u672a\u91ca\u653e\u7684\u533a\u5757").define("clean_unloaded", true);
-        CHUNK_UNLOAD_THRESHOLD_TICKS = serverBuilder.comment("\u533a\u5757\u5378\u8f7d\u540e\u591a\u4e45\u53ef\u4ee5\u6e05\u7406\uff08tick\uff09").defineInRange("unload_threshold", 600, 100, 6000);
-        MAX_CHUNKS_PER_CLEAN = serverBuilder.comment("\u6bcf\u6b21\u6e05\u7406\u7684\u6700\u5927\u533a\u5757\u6570\u91cf").defineInRange("max_per_clean", 1000, 100, 10000);
-        serverBuilder.pop();
-        serverBuilder.push("player_cleanup");
-        CLEAN_INVALID_PLAYERS = serverBuilder.comment("\u6e05\u7406\u65e0\u6548\u7684\u73a9\u5bb6\u5bf9\u8c61").define("clean_invalid", true);
-        PLAYER_CLEAN_INTERVAL = serverBuilder.comment("\u73a9\u5bb6\u6e05\u7406\u95f4\u9694\uff08\u5206\u949f\uff09").defineInRange("interval", 5, 1, 30);
-        serverBuilder.pop();
-        serverBuilder.push("performance");
-        CLEAN_BATCH_SIZE = serverBuilder.comment("\u6bcf\u6279\u6b21\u6e05\u7406\u7684\u5bf9\u8c61\u6570\u91cf\uff08\u907f\u514d\u5361\u987f\uff09").defineInRange("batch_size", 50, 10, 500);
-        CLEAN_DELAY_TICKS = serverBuilder.comment("\u6279\u6b21\u95f4\u5ef6\u8fdf\uff08tick\uff09").defineInRange("delay_ticks", 5, 1, 20);
-        AGGRESSIVE_MODE = serverBuilder.comment("\u6fc0\u8fdb\u6a21\u5f0f - \u66f4\u9891\u7e41\u4f46\u66f4\u5f7b\u5e95\u7684\u6e05\u7406").define("aggressive", false);
-        CLEAN_COOLDOWN_SECONDS = serverBuilder.comment("\u6e05\u7406\u51b7\u5374\u65f6\u95f4\uff08\u79d2\uff09- \u907f\u514d\u9891\u7e41\u6e05\u7406\u5bfc\u81f4\u5361\u987f").defineInRange("cooldown_seconds", 60, 10, 300);
-        AUTO_CLEAN_ON_THRESHOLD = serverBuilder.comment("\u8d85\u8fc7\u5185\u5b58\u9608\u503c\u65f6\u81ea\u52a8\u6e05\u7406").define("auto_clean_on_threshold", true);
-        serverBuilder.pop();
-        SERVER_SPEC = serverBuilder.build();
-        ModConfigSpec.Builder clientBuilder = new ModConfigSpec.Builder();
-        clientBuilder.push("client");
-        CLIENT_AUTO_CLEAN = clientBuilder.comment("\u5ba2\u6237\u7aef\u81ea\u52a8\u6e05\u7406").define("auto_clean", true);
-        CLIENT_CLEAN_INTERVAL = clientBuilder.comment("\u5ba2\u6237\u7aef\u6e05\u7406\u95f4\u9694\uff08\u79d2\uff09").defineInRange("clean_interval", 60, 10, 300);
-        CLIENT_MEMORY_THRESHOLD = clientBuilder.comment("\u5ba2\u6237\u7aef\u5185\u5b58\u9608\u503c\u767e\u5206\u6bd4").defineInRange("memory_threshold", 85, 50, 95);
-        CLIENT_SHOW_DEBUG = clientBuilder.comment("\u663e\u793a\u8c03\u8bd5\u4fe1\u606f").define("show_debug", false);
-        clientBuilder.pop();
-        CLIENT_SPEC = clientBuilder.build();
+    private static void saveFor(ConfigValue value) {
+        if (SERVER_VALUES.contains(value)) {
+            saveConfig(SERVER_CONFIG_FILE, SERVER_VALUES);
+        }
+        if (CLIENT_VALUES.contains(value)) {
+            saveConfig(CLIENT_CONFIG_FILE, CLIENT_VALUES);
+        }
+    }
+
+    private static void loadConfig(File file, List<ConfigValue> values) {
+        if (!file.exists()) {
+            saveConfig(file, values);
+            MemoryCleanerMod.LOGGER.info("\ud83d\udcdd \u5df2\u521b\u5efa\u9ed8\u8ba4\u914d\u7f6e\u6587\u4ef6: {}", file.getName());
+            return;
+        }
+        try (FileReader reader = new FileReader(file)) {
+            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+            for (ConfigValue value : values) {
+                if (json.has(value.key)) {
+                    value.loadFrom(json);
+                }
+            }
+            MemoryCleanerMod.LOGGER.info("\u2705 \u914d\u7f6e\u5df2\u52a0\u8f7d: {}", file.getName());
+        } catch (Exception e) {
+            MemoryCleanerMod.LOGGER.warn("\u274c \u52a0\u8f7d\u914d\u7f6e\u5931\u8d25: {} - {}", file.getName(), e.getMessage());
+        }
+    }
+
+    private static void saveConfig(File file, List<ConfigValue> values) {
+        JsonObject json = new JsonObject();
+        for (ConfigValue value : values) {
+            json.add(value.key, value.toJson());
+        }
+        try (FileWriter writer = new FileWriter(file)) {
+            GSON.toJson(json, writer);
+        } catch (IOException e) {
+            MemoryCleanerMod.LOGGER.warn("\u274c \u4fdd\u5b58\u9144\u7f6e\u5931\u8d25: {} - {}", file.getName(), e.getMessage());
+        }
+    }
+
+    public abstract static class ConfigValue {
+        protected final String key;
+        protected final JsonElement defaultValue;
+
+        ConfigValue(String key, JsonElement defaultValue) {
+            this.key = key;
+            this.defaultValue = defaultValue;
+        }
+
+        public abstract JsonElement toJson();
+
+        protected abstract void loadFrom(JsonObject json);
+    }
+
+    public static class BooleanValue extends ConfigValue {
+        private boolean value;
+
+        BooleanValue(String key, boolean defaultValue) {
+            super(key, GSON.toJsonTree(defaultValue));
+            this.value = defaultValue;
+        }
+
+        public boolean get() {
+            return value;
+        }
+
+        public void set(boolean value) {
+            this.value = value;
+            saveFor(this);
+        }
+
+        @Override
+        public JsonElement toJson() {
+            return GSON.toJsonTree(value);
+        }
+
+        @Override
+        protected void loadFrom(JsonObject json) {
+            this.value = json.get(key).getAsBoolean();
+        }
+    }
+
+    public static class IntValue extends ConfigValue {
+        private int value;
+
+        IntValue(String key, int defaultValue) {
+            super(key, GSON.toJsonTree(defaultValue));
+            this.value = defaultValue;
+        }
+
+        public int get() {
+            return value;
+        }
+
+        public void set(int value) {
+            this.value = value;
+            saveFor(this);
+        }
+
+        @Override
+        public JsonElement toJson() {
+            return GSON.toJsonTree(value);
+        }
+
+        @Override
+        protected void loadFrom(JsonObject json) {
+            this.value = json.get(key).getAsInt();
+        }
     }
 }

@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "memorycleaner",
+	"version": "${version}",
+	"name": "Just Memory Cleaner",
+	"description": "Just Memory Cleaner - a server/client memory cleanup mod. Server-side chunk unloading, player object cleanup and an automatic memory cleaner, configurable through commands and json config files.",
+	"authors": [
+		"luo_ye_ya"
+	],
+	"contact": {
+		"sources": "https://github.com/INORACLE/JustMemoryCleaner"
+	},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.memorycleaner.MemoryCleanerMod"
+		],
+		"client": [
+			"com.memorycleaner.client.ClientInitializer"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}
