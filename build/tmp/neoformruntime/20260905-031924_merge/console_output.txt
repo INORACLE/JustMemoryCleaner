@@ -1,0 +1,18 @@
+--------------------------------------------------------------------------------
+
+Command-Line:
+ - C:\Program Files\Zulu\zulu-21\bin\java.exe
+ - -jar
+ - C:\Users\September\.gradle\caches\modules-2\files-2.1\net.neoforged\mergetool\2.0.3\85c096b0155715275f84922d41462484c9a0285c\mergetool-2.0.3-fatjar.jar
+ - --client
+ - C:\Users\September\.gradle\caches\neoformruntime\intermediate_results\stripClient_1e8d42a9a9a25862d3d5cefc51e69e4bed2871a2_output.jar
+ - --server
+ - C:\Users\September\.gradle\caches\neoformruntime\intermediate_results\stripServer_3d54d5d3287c52b75a88dcef977395b042a126f9_output.jar
+ - --ann
+ - 1.21.1
+ - --output
+ - ./output.jar
+ - --inject
+ - false
+--------------------------------------------------------------------------------
+
