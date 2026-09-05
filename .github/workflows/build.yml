@@ -59,7 +59,7 @@ jobs:
           path: build/libs/
           if-no-files-found: error
 
-  build-fabric-1.21.1:
+  build_fabric_1211:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Fabric 1.21.1 branch
