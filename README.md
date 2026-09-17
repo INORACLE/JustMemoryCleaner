@@ -23,7 +23,7 @@
 | ---------------- | --------- | --------- | ---- | ------------------------------------------- |
 | `main`           | Fabric    | 1.20.1    | 17   | Fabric Loader >= 0.19.3 + Fabric API        |
 | `fabric-1.21.1`  | Fabric    | 1.21.1    | 21   | Fabric Loader >= 0.19.3 + Fabric API        |
-| `neoforge-1.21.1`| NeoForge  | 1.21.1    | 21   | NeoForge 21.1.249                           |
+| `neoforge-1.21.1`| NeoForge  | 1.21.1    | 21   | NeoForge 21.1.248                           |
 
 对应版本的 jar 由 GitHub Actions 自动构建，可在 [Actions 页面](https://github.com/INORACLE/JustMemoryCleaner/actions) 的 Artifacts 中下载：
 - `memorycleaner-1.20.1` (Fabric 1.20.1)
